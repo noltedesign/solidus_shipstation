@@ -36,7 +36,7 @@ xml.Orders(pages: (@shipments.total_count / 50.0).ceil) do
           variant = line.variant
           xml.Item do
             xml.SKU         { xml.cdata!(variant.sku.to_s[0,100]) }
-            xml.Name        { xml.cdata!([variant.product.name, variant.options_text].join(' ')[0,200]) }
+            xml.Name { xml.cdata!(strip_tags([variant.product.name, variant.options_text].join(' '))[0,200]) }
             xml.ImageUrl    { xml.cdata!(variant.images.first.try(:attachment).try(:url).to_s[0,200]) }
             xml.Weight      variant.weight.to_f
             xml.WeightUnits SolidusShipstation.configuration.weight_units
