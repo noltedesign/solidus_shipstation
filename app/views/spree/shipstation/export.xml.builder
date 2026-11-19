@@ -13,7 +13,6 @@ xml.Orders(pages: (@shipments.total_count / 50.0).ceil) do
       xml.LastModified   [order.completed_at, shipment.updated_at].max.strftime(SolidusShipstation::ExportHelper::DATE_FORMAT)
       xml.ShippingMethod { xml.cdata!(shipment.shipping_method.try(:name).to_s[0,100]) }
       xml.PaymentMethod  { xml.cdata!(order.payments.last&.payment_method&.name.to_s[0,50]) }
-      xml.CurrencyCode   order.currency
       xml.OrderTotal     order.total
       xml.TaxAmount      order.tax_total
       xml.ShippingAmount order.ship_total
@@ -36,13 +35,12 @@ xml.Orders(pages: (@shipments.total_count / 50.0).ceil) do
           variant = line.variant
           xml.Item do
             xml.SKU         { xml.cdata!(variant.sku.to_s[0,100]) }
-            xml.Name        { xml.cdata!(strip_tags([variant.product.name, variant.options_text].join(' '))[0,200]) }
+            xml.Name { xml.cdata!(strip_tags([variant.product.name, variant.options_text].join(' '))[0,200]) }
             xml.ImageUrl    { xml.cdata!(variant.images.first.try(:attachment).try(:url).to_s[0,200]) }
             xml.Weight      variant.weight.to_f
             xml.WeightUnits SolidusShipstation.configuration.weight_units
             xml.Quantity    line.quantity
             xml.UnitPrice   line.price
-            xml.UPC         { xml.cdata!(variant.try(:upc).to_s[0,50]) }
             xml.Location    { xml.cdata!(variant.try(:location).to_s[0,100]) }
             if variant.option_values.present?
               xml.Options do
